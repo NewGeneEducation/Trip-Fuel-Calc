@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Trip & Fuel Cost Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-tr from-cyan-900 via-teal-900 to-indigo-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 selection:bg-teal-500 selection:text-white">
+
+    <!-- Container Card -->
+    <div class="bg-white/95 backdrop-blur-2xl text-slate-800 w-full max-w-xl p-6 sm:p-8 rounded-[2.5rem] shadow-2xl shadow-black/40 border border-white/20 text-center">
+        
+        <!-- Header -->
+        <div class="flex flex-col items-center mb-6 pb-4 border-b border-slate-100">
+            <div class="p-3 bg-gradient-to-tr from-teal-500 to-indigo-600 text-white rounded-full shadow-lg mb-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-6-1a1 1 0 011-1h1m-1 1H4"></path>
+                </svg>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Trip & Fuel Calculator</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Interactive Google Maps Routing & Fuel Estimation</p>
+        </div>
+
+        <!-- Form Inputs -->
+        <form id="calcForm" class="space-y-4 text-left">
+            <!-- Origin & Destination -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">From (Origin)</label>
+                    <input type="text" id="origin" placeholder="e.g. Hyderabad" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">To (Destination)</label>
+                    <input type="text" id="destination" placeholder="e.g. Warangal" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+            </div>
+
+            <!-- Get Google Map Info Button -->
+            <div>
+                <button type="button" id="getRouteBtn" class="w-full bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-full text-sm shadow-md shadow-teal-600/20 transition duration-200 flex items-center justify-center gap-2 active:scale-98">
+                    <span>🗺️ Map Route & Directions</span>
+                </button>
+            </div>
+
+            <!-- Vehicle Type Quick Selectors -->
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">Vehicle Preset Mileage</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button type="button" class="preset-vehicle bg-slate-100 hover:bg-teal-100 hover:text-teal-800 text-slate-600 font-bold py-1.5 px-2 rounded-xl text-xs transition" data-kpl="45">Bike (45)</button>
+                    <button type="button" class="preset-vehicle bg-slate-100 hover:bg-teal-100 hover:text-teal-800 text-slate-600 font-bold py-1.5 px-2 rounded-xl text-xs transition" data-kpl="18">Hatch (18)</button>
+                    <button type="button" class="preset-vehicle bg-slate-100 hover:bg-teal-100 hover:text-teal-800 text-slate-600 font-bold py-1.5 px-2 rounded-xl text-xs transition" data-kpl="14">Sedan (14)</button>
+                    <button type="button" class="preset-vehicle bg-slate-100 hover:bg-teal-100 hover:text-teal-800 text-slate-600 font-bold py-1.5 px-2 rounded-xl text-xs transition" data-kpl="10">SUV (10)</button>
+                </div>
+            </div>
+
+            <!-- Distance, Mileage, Petrol Price -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">One-Way Dist. (km)</label>
+                    <input type="number" id="distance" placeholder="km" min="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">Mileage (km/L)</label>
+                    <input type="number" id="kpl" value="15" min="0.1" step="0.1" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">Fuel Price (₹/L)</label>
+                    <input type="number" id="fuelPrice" value="107.41" min="0" step="0.01" class="w-full px-4 py-3 bg-teal-50/50 border border-teal-200 rounded-full text-sm font-semibold text-teal-800 focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+                </div>
+            </div>
+
+            <!-- Fuel Type Switcher -->
+            <div class="flex justify-end gap-2 text-xs font-semibold text-slate-500 px-1">
+                <span>Set Price:</span>
+                <button type="button" class="set-price hover:text-teal-600 underline" data-price="119">Petrol (119)</button>
+                <button type="button" class="set-price hover:text-teal-600 underline" data-price="95.65">Diesel (95.65)</button>
+                <button type="button" class="set-price hover:text-teal-600 underline" data-price="90.00">CNG (90.00)</button>
+            </div>
+
+            <!-- Optional Toggles -->
+            <div class="space-y-2.5 pt-2 border-t border-slate-100 px-1">
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center space-x-2.5 text-sm font-semibold text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="isRoundTrip" class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                        <span>Round Trip (2-Way)</span>
+                    </label>
+                    <span class="text-xs font-bold text-slate-400" id="roundTripBadge">One-Way</span>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center space-x-2.5 text-sm font-semibold text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="enableTolls" class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                        <span>Include Tolls / Parking (₹)</span>
+                    </label>
+                    <input type="number" id="tolls" placeholder="0" min="0" class="w-32 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold hidden focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center space-x-2.5 text-sm font-semibold text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="enableSplit" class="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500">
+                        <span>Split Among Passengers</span>
+                    </label>
+                    <input type="number" id="passengers" placeholder="Passengers" value="1" min="1" class="w-32 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm font-semibold hidden focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                </div>
+            </div>
+        </form>
+
+        <!-- Dynamic Embedded Map & Directions Area -->
+        <div id="mapLinkContainer" class="mt-4 hidden space-y-3">
+            <div class="w-full h-56 rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
+                <iframe id="mapFrame" width="100%" height="100%" frameborder="0" style="border:0" loading="lazy" allowfullscreen src=""></iframe>
+            </div>
+            <a id="mainMapLink" href="#" target="_blank" class="block text-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-full text-xs shadow-md shadow-emerald-600/20 transition">
+                📍 Open Navigation Directions in Google Maps
+            </a>
+        </div>
+
+        <!-- Results / Report Section -->
+        <div class="mt-4 p-5 bg-gradient-to-br from-teal-50/70 via-indigo-50/50 to-purple-50/70 rounded-[2rem] border border-teal-100/60 space-y-2.5 text-sm text-left shadow-inner">
+            <div class="flex justify-between items-center text-slate-600 px-1">
+                <span>Total Distance Calculated:</span>
+                <span id="totalDistanceDisplay" class="font-bold text-slate-900 bg-white px-3 py-1 rounded-full shadow-sm">0 km</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600 px-1">
+                <span>Fuel Required:</span>
+                <span id="fuelNeeded" class="font-bold text-slate-900 bg-white px-3 py-1 rounded-full shadow-sm">0.00 Liters</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600 px-1">
+                <span>Fuel Cost:</span>
+                <span id="fuelCost" class="font-bold text-slate-900 bg-white px-3 py-1 rounded-full shadow-sm">₹0.00</span>
+            </div>
+            <div id="tollRow" class="flex justify-between items-center text-slate-600 hidden px-1">
+                <span>Tolls & Extras:</span>
+                <span id="tollCostDisplay" class="font-bold text-slate-900 bg-white px-3 py-1 rounded-full shadow-sm">₹0.00</span>
+            </div>
+            <div class="flex justify-between items-center text-base font-extrabold border-t border-teal-100 pt-3 text-teal-800 px-1">
+                <span>Total Estimated Cost:</span>
+                <span id="totalCost" class="text-lg">₹0.00</span>
+            </div>
+            <div id="splitRow" class="flex justify-between items-center text-xs text-indigo-600 font-bold hidden pt-1 px-1">
+                <span>Cost Per Person:</span>
+                <span id="perPersonCost" class="text-sm">₹0.00</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 mt-4">
+            <button type="button" id="resetBtn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-full text-xs shadow-sm transition">Reset</button>
+            <button type="button" onclick="window.print()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-full text-xs shadow-sm transition">Print / Save</button>
+        </div>
+
+        
+
+        <!-- Developer Credit Footer -->
+        <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+            <p class="text-[11px] font-semibold text-slate-400">NewGen eEducation - <span class="text-teal-700 font-bold">Guduru Sathish Kumar</span></p>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        // Block Context Menu & Inspection Shortcuts
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) { e.preventDefault(); return false; }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'i' || e.key === 'I' || e.keyCode === 73)) { e.preventDefault(); return false; }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'j' || e.key === 'J' || e.keyCode === 74)) { e.preventDefault(); return false; }
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'c' || e.key === 'C' || e.keyCode === 67)) { e.preventDefault(); return false; }
+          if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) { e.preventDefault(); return false; }
+        });
+
+        // Anti-Debug Trap
+        (function antiDebug() {
+          setInterval(function() {
+            const start = Date.now();
+            (function() {}["constructor"]("debugger")());
+            if (Date.now() - start > 100) {
+              document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:20%;">Developer Tools are restricted. Please close the console and reload.</h2>';
+            }
+          }, 1000);
+        })();
+
+        // Elements
+        const calcForm = document.getElementById('calcForm');
+        const distanceInput = document.getElementById('distance');
+        const kplInput = document.getElementById('kpl');
+        const fuelPriceInput = document.getElementById('fuelPrice');
+        const originInput = document.getElementById('origin');
+        const destinationInput = document.getElementById('destination');
+        const getRouteBtn = document.getElementById('getRouteBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const isRoundTrip = document.getElementById('isRoundTrip');
+        const roundTripBadge = document.getElementById('roundTripBadge');
+        
+        const enableTolls = document.getElementById('enableTolls');
+        const tollsInput = document.getElementById('tolls');
+        const tollRow = document.getElementById('tollRow');
+        const tollCostDisplay = document.getElementById('tollCostDisplay');
+
+        const enableSplit = document.getElementById('enableSplit');
+        const passengersInput = document.getElementById('passengers');
+        const splitRow = document.getElementById('splitRow');
+        const perPersonCost = document.getElementById('perPersonCost');
+
+        const totalDistanceDisplay = document.getElementById('totalDistanceDisplay');
+        const fuelNeededEl = document.getElementById('fuelNeeded');
+        const fuelCostEl = document.getElementById('fuelCost');
+        const totalCostEl = document.getElementById('totalCost');
+        const mainMapLink = document.getElementById('mainMapLink');
+        const mapFrame = document.getElementById('mapFrame');
+        const mapLinkContainer = document.getElementById('mapLinkContainer');
+
+        // Presets & Fuel Type Click Handlers
+        document.querySelectorAll('.preset-vehicle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                kplInput.value = btn.dataset.kpl;
+                calculate();
+            });
+        });
+
+        document.querySelectorAll('.set-price').forEach(btn => {
+            btn.addEventListener('click', () => {
+                fuelPriceInput.value = btn.dataset.price;
+                calculate();
+            });
+        });
+
+        enableTolls.addEventListener('change', () => {
+            tollsInput.classList.toggle('hidden', !enableTolls.checked);
+            tollRow.classList.toggle('hidden', !enableTolls.checked);
+            if (!enableTolls.checked) tollsInput.value = '';
+            calculate();
+        });
+
+        enableSplit.addEventListener('change', () => {
+            passengersInput.classList.toggle('hidden', !enableSplit.checked);
+            splitRow.classList.toggle('hidden', !enableSplit.checked);
+            if (!enableSplit.checked) passengersInput.value = '1';
+            calculate();
+        });
+
+        isRoundTrip.addEventListener('change', () => {
+            roundTripBadge.textContent = isRoundTrip.checked ? "Round-Trip (x2)" : "One-Way";
+            calculate();
+        });
+
+        function calculate() {
+            const rawDist = parseFloat(distanceInput.value) || 0;
+            const distMultiplier = isRoundTrip.checked ? 2 : 1;
+            const dist = rawDist * distMultiplier;
+            const kpl = parseFloat(kplInput.value) || 1;
+            const price = parseFloat(fuelPriceInput.value) || 0;
+            const tolls = enableTolls.checked ? (parseFloat(tollsInput.value) || 0) : 0;
+            const passengers = enableSplit.checked ? (parseInt(passengersInput.value) || 1) : 1;
+
+            const liters = dist / kpl;
+            const fCost = liters * price;
+            const total = fCost + tolls;
+            const perPerson = total / (passengers > 0 ? passengers : 1);
+
+            totalDistanceDisplay.textContent = `${dist.toFixed(1)} km`;
+            fuelNeededEl.textContent = `${liters.toFixed(2)} Liters`;
+            fuelCostEl.textContent = `₹${fCost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            tollCostDisplay.textContent = `₹${tolls.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            totalCostEl.textContent = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            perPersonCost.textContent = `₹${perPerson.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        getRouteBtn.addEventListener('click', () => {
+            const orig = originInput.value.trim();
+            const dest = destinationInput.value.trim();
+
+            if (!orig || !dest) {
+                alert("Please enter both 'From (Origin)' and 'To (Destination)' locations first.");
+                mapLinkContainer.classList.add('hidden');
+                return;
+            }
+
+            const encOrig = encodeURIComponent(orig);
+            const encDest = encodeURIComponent(dest);
+            const preciseMapUrl = `https://www.google.com/maps/dir/?api=1&origin=${encOrig}&destination=${encDest}&travelmode=driving`;
+            const embedUrl = `https://maps.google.com/maps?q=from+${encOrig}+to+${encDest}&output=embed`;
+
+            mapFrame.src = embedUrl;
+            mainMapLink.href = preciseMapUrl;
+            mapLinkContainer.classList.remove('hidden');
+            calculate();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            calcForm.reset();
+            fuelPriceInput.value = "107.41";
+            kplInput.value = "15";
+            roundTripBadge.textContent = "One-Way";
+            tollsInput.classList.add('hidden');
+            tollRow.classList.add('hidden');
+            passengersInput.classList.add('hidden');
+            splitRow.classList.add('hidden');
+            mapLinkContainer.classList.add('hidden');
+            mapFrame.src = "";
+            calculate();
+        });
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+    </script>
+</body>
+</html>
